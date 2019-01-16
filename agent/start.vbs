@@ -1,0 +1,1 @@
+CreateObject("Wscript.Shell").Run "node agent.js", 0
