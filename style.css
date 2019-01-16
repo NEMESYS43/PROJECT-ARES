@@ -1,0 +1,115 @@
+.show{
+  display:block;
+}
+.hide{
+  display:none;
+}
+body{
+    background:#1c2127;
+    font-family: 'Roboto', sans-serif;
+}
+.mdl-layout__header{
+    background:#313A45;
+}
+
+.mdl-navigation__link{
+  cursor: pointer;
+}
+.mdl-layout__drawer-button{
+    
+}
+.mdl-layout__drawer{
+    position: absolute;
+    background:#21252B;
+    border:none;
+    
+    bottom:0px;
+}
+
+.mdl-layout__drawer span{
+    color:#0077ee;
+}
+
+.header-img{
+    position: absolute;
+    top:10px;
+    width:200px;
+    height:50px;
+    margin-right:50%;
+    right:-108px;
+
+    background-image:url("../img/hermes.png");
+    background-size: 200px, 50px;
+
+}
+.agent-view{
+  position:absolute;
+  top:0px;
+  right:0px;
+  left:0px;
+  bottom:0px;
+}
+.agent-view-table{
+    position:relative;
+    top:20px;
+    right:20px;
+    left:20px;
+}
+.login-view{
+  position:absolute;
+  top:0px;
+  right:0px;
+  left:0px;
+  bottom:0px;
+}
+.login-view-form-container{
+  position: absolute;
+  width:300px;
+  height:300px;
+  margin-right:50%;
+  right:-150px;
+  margin-top:50%;
+  top:-500px;
+  background:#313A45;
+  border-radius:8px;
+}
+.login-view-form-container-title{
+  position: absolute;
+  top:0px;
+  left:0px;
+  right:0px;
+  height:60px;
+  background: #0077ee;
+  border-radius: 8px 8px 0px 0px;
+}
+.login-view-form-container h1{
+position:absolute;
+padding:0px;
+margin:0px;
+color:#313a45;
+font-size:20pt;
+left:10px;
+top:15px;
+}
+.login-view-form-container form{
+  position:absolute;
+  top:80px;
+  width:280px;
+  margin-right:50%;
+  right:-140px;
+}
+.login-view-form-container .mdl-textfield__input{
+  color:#0077ee;
+}
+.login-view-form-container .mdl-textfield__label{
+  color:#0077ee;
+}
+.login-view-form-container .mdl-textfield__input{
+    border-bottom: 1.5px solid #0077ee;
+}
+.login-view-form-container .mdl-button{
+  margin-top:10px;
+  float:right;
+  background:#0077ee;
+  color:#313a45;
+}
