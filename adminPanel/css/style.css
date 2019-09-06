@@ -5,6 +5,12 @@
 .hide{
   display:none;
 }
+.offline-red{
+  color:#e74c3c;
+}
+.online-green{
+  color:#27ae60;
+}
 body{
     background:#1c2127;
     font-family: 'Roboto', sans-serif;
@@ -81,11 +87,7 @@ body{
   right:20px;
   bottom:20px;
 }
-.agent-list-table{
-  width:100%;
-    background:#21252B;
-    color: #757575;
-}
+
 .agent-list-table th{
   color: #757575;
 }
@@ -478,6 +480,7 @@ text-overflow: ellipsis
 
 
 @media only screen and (min-width: 361px) {
+  /*
   .header-img{
       position: absolute;
       top:7px;
@@ -485,7 +488,7 @@ text-overflow: ellipsis
       height:50px;
       margin-right:50%;
       right:-108px;
-      background-image:url("../img/hermes.png");
+      background-image:url("../img/ares.png");
       background-size: 200px, 50px;
   }
   .header-img-login{
@@ -495,10 +498,11 @@ text-overflow: ellipsis
     height:50px;
     margin-right:50%;
     right:-108px;
-    background-image:url("../img/hermes.png");
+    background-image:url("../img/ares.png");
     background-size: 200px, 50px;
 
-}
+}*/
+
 
 
   .login-view-form-container{
@@ -553,38 +557,82 @@ text-overflow: ellipsis
     color:#313a45;
   }
 }
+
+
+
+@media only screen and ( min-width: 1025px) {
+
+  .agent-list-table{
+    width:100%;
+      background:#21252B;
+      color: #757575;
+      font-size:15px;
+  }
+
+
+  .header-img{
+    position: absolute !important;
+    top:5px !important;
+    width:150px !important;
+    height:55px!important;
+    margin-right:50% !important;
+    right:-80px !important;
+    background-image:url("../img/ares.png") !important;
+    background-size:150px,55px !important;
+  }
+  .header-img-login{
+    position: absolute !important;
+    top:5px !important;
+    width:150px !important;
+    height:55px !important;
+    margin-right:50% !important;
+    right:-80px !important;
+    background-image:url("../img/ares.png") !important;
+    background-size:150px,55px !important;
+  }
+}
 @media only screen and (max-width: 1025px),( min-width: 555px) {
+  .agent-list-table{
+    width:100%;
+      background:#21252B;
+      color: #757575;
+      font-size:15px;
+  }
   .header-img{
     position: absolute;
-    top:2px;
-    width:200px;
-    height:50px;
+    top:5px;
+    width:125px;
+    height:47px;
     margin-right:50%;
-    right:-108px;
-
-    background-image:url("../img/hermes.png");
-    background-size: 200px, 50px;
+    right:-80px;
+    background-image:url("../img/ares.png");
+    background-size:125px,47px;
   }
   .header-img-login{
     position: absolute;
-    top:2px;
-    width:200px;
-    height:50px;
+    top:5px;
+    width:125px;
+    height:47px;
     margin-right:50%;
-    right:-108px;
-
-    background-image:url("../img/hermes.png");
-    background-size: 200px, 50px;
+    right:-80px;
+    background-image:url("../img/ares.png");
+    background-size:125px,47px;
   }
 }
+
+
 @media only screen and (max-width: 555px) {
+
   .header-img{
     display: none;
   }
-}
 
-
-@media only screen and (max-width: 360px) {
+  .agent-list-table{
+    width:100%;
+      background:#21252B;
+      color: #757575;
+      font-size:10px;
+  }
 
   .login-view-form-container{
     position: absolute;
@@ -592,8 +640,6 @@ text-overflow: ellipsis
     left:0px;
     top:0px;
     bottom:0px;
-
-
   }
 
   .login-textfields-container{

